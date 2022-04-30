@@ -10,21 +10,37 @@ import React, { useContext, useEffect, useState } from "react";
 import Icon from "react-native-vector-icons/FontAwesome";
 import { Context } from "../App";
 import axios from "axios";
+import SnackbarComponent from "react-native-snackbar-component";
 
 const StockScreen = ({ navigation }) => {
   const value = useContext(Context);
 
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarText, setSnackbarText] = useState("");
+
   console.log("value inside stockscreen= ", value);
   const addToFavorites = () => {
     console.log("added to favorites");
+    setSnackbarText(`${value.stock.ticker} was added to watchlist`);
+    setSnackbarVisible(true);
+    setTimeout(() => {
+      setSnackbarVisible(false);
+    }, 1000);
     value.setFavorites((prev) => [...prev, value.stock]);
     console.log("after adding favorite=", value);
   };
 
   const removeFromFavorites = () => {
-    value.setFavorites((prev) => prev.filter((movie) => movie !== value.stock));
+    setSnackbarText(`${value.stock.ticker} was removed from watchlist`);
+    setSnackbarVisible(true);
+    setTimeout(() => {
+      setSnackbarVisible(false);
+    }, 1000);
+    value.setFavorites((prev) =>
+      prev.filter((movie) => movie.ticker !== value.stock.ticker)
+    );
   };
 
   useEffect(() => {
@@ -48,8 +64,30 @@ const StockScreen = ({ navigation }) => {
     }
   };
 
+  const isFavorite = () => {
+    console.log("value.stock= ", value.stock);
+    let flag;
+    value.favorites.forEach((obj) => {
+      if (obj["ticker"] === value.stock.ticker) {
+        console.log("current stock is part of favorites");
+        flag = true;
+        return true;
+      }
+    });
+
+    if (flag) return true;
+    console.log("Stock not in favorites");
+    return false;
+  };
+
   return (
     <View style={styles.container}>
+      <SnackbarComponent
+        visible={snackbarVisible}
+        textMessage={snackbarText}
+        backgroundColor="white"
+        messageColor="black"
+      />
       <StatusBar backgroundColor="#1e1e1e" />
 
       <View style={styles.header}>
@@ -57,7 +95,7 @@ const StockScreen = ({ navigation }) => {
         <Icon.Button
           backgroundColor={null}
           onPress={() => {
-            value.setStock(null);
+            // value.setStock(null);
             navigation.goBack();
           }}
           name="angle-left"
@@ -65,7 +103,7 @@ const StockScreen = ({ navigation }) => {
         />
 
         <Text style={{ color: "#939393", alignSelf: "center" }}>Details</Text>
-        {value.favorites.includes(value.stock) ? (
+        {isFavorite() ? (
           <Icon.Button
             backgroundColor={null}
             onPress={removeFromFavorites}
