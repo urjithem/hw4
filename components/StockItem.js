@@ -14,7 +14,7 @@ const StockItem = ({ stock, navigation }) => {
     value.setStockSymbol(stock.symbol);
     // console.log("value= ", value);
     console.log("Stock data= ", res.data);
-    navigation.navigate("Stock");
+    navigation.replace("Stock");
   };
 
   return (

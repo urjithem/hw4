@@ -7,10 +7,12 @@ import {
   ActivityIndicator,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
-import Icon from "react-native-vector-icons/FontAwesome";
+import Icon from "react-native-vector-icons/Entypo";
 import { Context } from "../App";
 import axios from "axios";
 import SnackbarComponent from "react-native-snackbar-component";
+import StatsTable from "../components/StatsTable";
+import AboutTable from "../components/AboutTable";
 
 const StockScreen = ({ navigation }) => {
   const value = useContext(Context);
@@ -27,7 +29,7 @@ const StockScreen = ({ navigation }) => {
     setSnackbarVisible(true);
     setTimeout(() => {
       setSnackbarVisible(false);
-    }, 1000);
+    }, 2000);
     value.setFavorites((prev) => [...prev, value.stock]);
     console.log("after adding favorite=", value);
   };
@@ -91,18 +93,20 @@ const StockScreen = ({ navigation }) => {
       <StatusBar backgroundColor="#1e1e1e" />
 
       <View style={styles.header}>
-        {/* <Button title="" onPress={() => navigation.goBack()}></Button> */}
         <Icon.Button
           backgroundColor={null}
           onPress={() => {
             // value.setStock(null);
             navigation.goBack();
           }}
-          name="angle-left"
+          name="chevron-thin-left"
           color="white"
+          size={20}
         />
 
-        <Text style={{ color: "#939393", alignSelf: "center" }}>Details</Text>
+        <Text style={{ color: "white", alignSelf: "center", fontSize: 20 }}>
+          Details
+        </Text>
         {isFavorite() ? (
           <Icon.Button
             backgroundColor={null}
@@ -114,7 +118,7 @@ const StockScreen = ({ navigation }) => {
           <Icon.Button
             backgroundColor={null}
             onPress={addToFavorites}
-            name="star-o"
+            name="star-outlined"
             color="white"
           />
         )}
@@ -147,12 +151,15 @@ const StockScreen = ({ navigation }) => {
               <ActivityIndicator size="large" color="#8f21a6" />
             </View>
           ) : (
-            <View>
+            <View style={{ paddingHorizontal: 20, marginTop: 20 }}>
               <View
-                style={{ flexDirection: "row", display: "flex", marginTop: 20 }}
+                style={{
+                  flexDirection: "row",
+                  display: "flex",
+                }}
               >
                 <Text
-                  style={{ color: "white", fontSize: 30, fontWeight: "bold" }}
+                  style={{ color: "white", fontSize: 30, fontWeight: "100" }}
                 >
                   {value.stock.ticker}
                 </Text>
@@ -160,7 +167,7 @@ const StockScreen = ({ navigation }) => {
                   style={{
                     color: "#939393",
                     fontSize: 30,
-                    fontWeight: "bold",
+                    fontWeight: "100",
                     marginLeft: 20,
                   }}
                 >
@@ -172,7 +179,7 @@ const StockScreen = ({ navigation }) => {
                 style={{ flexDirection: "row", display: "flex", marginTop: 20 }}
               >
                 <Text
-                  style={{ color: "white", fontSize: 30, fontWeight: "bold" }}
+                  style={{ color: "white", fontSize: 30, fontWeight: "100" }}
                 >
                   {value.stock.c}
                 </Text>
@@ -180,7 +187,7 @@ const StockScreen = ({ navigation }) => {
                   style={{
                     color: `${value.stock.d ? "red" : "green"}`,
                     fontSize: 30,
-                    fontWeight: "bold",
+                    fontWeight: "100",
                     marginLeft: 20,
                   }}
                 >
@@ -191,59 +198,28 @@ const StockScreen = ({ navigation }) => {
                 style={{
                   color: "white",
                   fontSize: 30,
-                  fontWeight: "bold",
+                  fontWeight: "100",
                   marginTop: 20,
                 }}
               >
                 Stats
               </Text>
               <View>
-                <Text style={{ color: "white" }}>
-                  Table to be displayed here
-                </Text>
+                <StatsTable stock={value.stock} />
               </View>
 
               <Text
                 style={{
                   color: "white",
                   fontSize: 30,
-                  fontWeight: "bold",
+                  fontWeight: "100",
                   marginTop: 20,
                 }}
               >
                 About
               </Text>
 
-              <View
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  color: "white",
-                }}
-              >
-                <Text style={{ color: "white" }}>Start Date</Text>
-                <Text style={{ color: "white" }}>{value.stock.ipo}</Text>
-              </View>
-              <View style={{ display: "flex", flexDirection: "row" }}>
-                <Text style={{ color: "white" }}>Industry</Text>
-                <Text style={{ color: "white" }}>
-                  {value.stock.finnhubIndustry}
-                </Text>
-              </View>
-              <View style={{ display: "flex", flexDirection: "row" }}>
-                <Text style={{ color: "white" }}>Website</Text>
-                <Text style={{ color: "white" }}>{value.stock.weburl}</Text>
-              </View>
-              <View style={{ display: "flex", flexDirection: "row" }}>
-                <Text style={{ color: "white" }}>Exchange</Text>
-                <Text style={{ color: "white" }}>{value.stock.exchange}</Text>
-              </View>
-              <View style={{ display: "flex", flexDirection: "row" }}>
-                <Text style={{ color: "white" }}>Market Cap</Text>
-                <Text style={{ color: "white" }}>
-                  {value.stock.marketCapitalization}
-                </Text>
-              </View>
+              <AboutTable stock={value.stock} />
             </View>
           )}
         </>
@@ -256,9 +232,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#000000",
+    // backgroundColor: "pink",
     color: "white",
-    paddingHorizontal: 10,
-    paddingVertical: 10,
+    // paddingHorizontal: 10,
+    // paddingVertical: 10,
   },
   header: {
     display: "flex",
@@ -266,6 +243,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     width: "100%",
+    backgroundColor: "#1e1e1e",
+    paddingHorizontal: 5,
+    height: 60,
   },
 });
 

@@ -34,25 +34,29 @@ export default function App() {
           <Stack.Screen
             name="Home"
             component={HomeScreen}
-            options={({ navigation }) => ({
-              title: "Stock",
-              headerTitleAlign: "center",
-              headerTintColor: "white",
-              headerStyle: {
-                backgroundColor: "#8f21a6",
-              },
-              headerRight: () => (
-                <Icon.Button
-                  backgroundColor={null}
-                  onPress={() => {
-                    console.log("search button clicked");
-                    navigation.navigate("Search");
-                  }}
-                  name="search"
-                  color="white"
-                />
-              ),
-            })}
+            options={{ headerShown: false }}
+            // options={({ navigation }) => ({
+            //   title: "Stock",
+            //   headerTitleAlign: "center",
+            //   headerTintColor: "white",
+            //   headerStyle: {
+            //     backgroundColor: "#8f21a6",
+            //     marginRight: 0,
+            //   },
+
+            //   headerRight: () => (
+            //     <Icon.Button
+            //       backgroundColor={"#8f21a6"}
+            //       iconStyle={{ margin: 0, padding: 0 }}
+            //       onPress={() => {
+            //         console.log("search button clicked");
+            //         navigation.navigate("Search");
+            //       }}
+            //       name="search"
+            //       color="white"
+            //     />
+            //   ),
+            // })}
           />
 
           <Stack.Screen

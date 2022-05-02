@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StatusBar,
-  Animated,
   Button,
   Pressable,
   TouchableOpacity,
@@ -14,18 +13,52 @@ import { Context } from "../App";
 import {
   Swipeable,
   GestureHandlerRootView,
+  //   TouchableOpacity,
+  State,
+  PanGestureHandler,
 } from "react-native-gesture-handler";
-import Icon from "react-native-vector-icons/FontAwesome5";
+import {
+  usePanGestureHandler,
+  useValue,
+  timing,
+} from "react-native-redash/lib/module/v1";
+import Animated, {
+  event,
+  cond,
+  Value,
+  block,
+  set,
+  eq,
+  add,
+  not,
+  clockRunning,
+  and,
+  startClock,
+  stopClock,
+  spring,
+  greaterThan,
+  lessThan,
+  call,
+  Clock,
+  useCode,
+  useAnimatedGestureHandler,
+  useSharedValue,
+  useAnimatedStyle,
+} from "react-native-reanimated";
+import Icon from "react-native-vector-icons/EvilIcons";
 import Modal from "react-native-modal";
 import axios from "axios";
-// import Snackbar from "react-native-snackbar-component";
 import SnackbarComponent from "react-native-snackbar-component";
+import FavoriteBlock from "../components/FavoriteBlock";
+
 const date = new Date();
 var formattedDate = format(date, "MMMM do").toString().slice(0, -2);
 console.log(formattedDate);
 
 const HomeScreen = ({ navigation }) => {
   const value = useContext(Context);
+  const clock = new Clock();
+
   console.log(value);
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -33,18 +66,48 @@ const HomeScreen = ({ navigation }) => {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarText, setSnackbarText] = useState("");
 
+  const { gestureHandler, state, velocity, translation } =
+    usePanGestureHandler();
+
+  //   Tansition Values
+  const t1X = useValue(0);
+  // offset value
+  const ofX = useValue(0);
+  //   useCode(() => [cond(eq(state, State.ACTIVE), set(t1X, add(ofX, 100)))]);
+  useCode(
+    () => [cond(eq(state, State.ACTIVE), set(t1X, add(ofX, translation.x)))],
+    []
+  );
+
+  //////////////////////////////////////////////////////////////////
+  //   const transX = useSharedValue(0);
+
+  const panGestureEvent = useAnimatedGestureHandler({
+    onStart: (e) => {
+      console.log("startedhomescreen");
+    },
+    onActive: (e) => {
+      t1X = e.translationX;
+      console.log(e.translationX);
+    },
+    onEnd: (e) => {},
+  });
+
+  //   const rStyle = useAnimatedStyle(() => {
+  //     return {
+  //       transform: [{ translateX: translateX.value }],
+  //     };
+  //   });
+  ////////////////////////////////////////////////////////
+
   const removeFavorites = () => {
     console.log("remove from fav clicked");
     console.log("selectedStock= ", selectedStock);
-    // Snackbar.show({
-    //   text: "Hello world",
-    //   duration: 1000,
-    // });
     setSnackbarText(`${selectedStock.ticker} was removed from watchlist`);
     setSnackbarVisible(true);
     setTimeout(() => {
       setSnackbarVisible(false);
-    }, 1000);
+    }, 2000);
 
     value.setFavorites((prev) =>
       prev.filter((temp) => temp["ticker"] !== selectedStock.ticker)
@@ -70,7 +133,7 @@ const HomeScreen = ({ navigation }) => {
       <View
         style={{
           backgroundColor: "red",
-          width: "100%",
+          //   width: "100%",
           display: "flex",
           flexDirection: "row",
           alignItems: "center",
@@ -90,6 +153,47 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <StatusBar backgroundColor="#8f21a6" />
+      <View
+        style={{
+          display: "flex",
+          backgroundColor: "#8f21a6",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          height: 50,
+        }}
+      >
+        <Text
+          style={{
+            color: "white",
+            fontWeight: "500",
+            alignSelf: "center",
+            textAlign: "center",
+            flex: 1,
+            marginLeft: 40,
+            fontSize: 20,
+          }}
+        >
+          Stock
+        </Text>
+        <Icon.Button
+          backgroundColor={"#8f21a6"}
+          iconStyle={{
+            margin: 0,
+            padding: 0,
+            alignSelf: "flex-end",
+          }}
+          onPress={() => {
+            console.log("search button clicked");
+            navigation.navigate("Search");
+          }}
+          name="search"
+          color="white"
+          size={30}
+        />
+        {/* <Text style={{ color: "white" }}>Stock2</Text> */}
+      </View>
       <SnackbarComponent
         visible={snackbarVisible}
         textMessage={snackbarText}
@@ -106,10 +210,10 @@ const HomeScreen = ({ navigation }) => {
               paddingHorizontal: 20,
             }}
           >
-            <Text style={{ color: "white", fontWeight: "bold" }}>
-              Delete Confirmation {modalVisible === true ? "true" : "no"}
+            <Text style={{ color: "white", fontWeight: "300", fontSize: 20 }}>
+              Delete Confirmation
             </Text>
-            <Text style={{ color: "white" }}>
+            <Text style={{ color: "white", marginTop: 20 }}>
               Are you sure you want to delete this item ?
             </Text>
             <View
@@ -118,6 +222,7 @@ const HomeScreen = ({ navigation }) => {
                 flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "flex-end",
+                marginTop: 20,
               }}
             >
               <Pressable
@@ -147,12 +252,19 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.header}>
         <View style={styles.right}>
           <View style={styles.firstline}>
-            <Text style={{ fontWeight: "bold", fontSize: 20, color: "white" }}>
+            <Text style={{ fontWeight: "bold", fontSize: 25, color: "white" }}>
               STOCK WATCH
             </Text>
           </View>
           <View style={styles.secondline}>
-            <Text style={{ alignSelf: "flex-end", color: "white" }}>
+            <Text
+              style={{
+                alignSelf: "flex-end",
+                color: "white",
+                fontSize: 25,
+                fontWeight: "bold",
+              }}
+            >
               {formattedDate}
             </Text>
           </View>
@@ -162,11 +274,20 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.body}>
         <Text style={{ color: "white", fontSize: 20 }}>Favorites</Text>
         {/* <GestureHandlerRootView>
-          <Swipeable renderRightActions={rightSwipe}>
-            <View style={{ backgroundColor: "blue" }}>
-              <Text>HIIIII</Text>
-            </View>
-          </Swipeable>
+          <PanGestureHandler
+            {...gestureHandler}
+            // onGestureEvent={panGestureEvent}
+          >
+            <Animated.View
+              style={{
+                transform: [{ translateX: t1X }],
+                height: 60,
+                backgroundColor: "pink",
+              }}
+            >
+              <Text>HELLLOOO</Text>
+            </Animated.View>
+          </PanGestureHandler>
         </GestureHandlerRootView> */}
 
         {value.favorites.length === 0 ? (
@@ -175,13 +296,13 @@ const HomeScreen = ({ navigation }) => {
               style={{
                 borderBottomColor: "white",
                 borderBottomWidth: 2,
-                marginTop: 10,
+                marginTop: 20,
               }}
             ></View>
             <Text
               style={{
                 color: "white",
-                fontSize: 20,
+                fontSize: 23,
                 fontWeight: "bold",
                 alignSelf: "center",
                 marginTop: 15,
@@ -193,32 +314,124 @@ const HomeScreen = ({ navigation }) => {
         ) : (
           <View>
             {value.favorites.map((stock, idx) => (
-              <GestureHandlerRootView key={idx}>
-                <Swipeable
-                  renderRightActions={rightSwipe}
-                  onSwipeableRightOpen={() => {
-                    console.log("onSwipeableRightOpen stock= ", stock);
-                    setModalVisible(true);
-                    setSelectedStock(stock);
-                  }}
-                >
-                  <TouchableOpacity onPress={() => handleFavClick(stock)}>
-                    <View
-                      // key={idx}
-                      style={{
-                        display: "flex",
-                        borderTopColor: "white",
-                        borderTopWidth: 2,
-                        marginTop: 20,
-                        paddingTop: 20,
-                      }}
-                    >
-                      <Text style={{ color: "white" }}>{stock.ticker}</Text>
-                      <Text style={{ color: "white" }}>{stock.name}</Text>
-                    </View>
-                  </TouchableOpacity>
-                </Swipeable>
-              </GestureHandlerRootView>
+              <FavoriteBlock
+                stock={stock}
+                navigation={navigation}
+                key={idx}
+                setModalVisible={setModalVisible}
+                handleFavClick={handleFavClick}
+                setSelectedStock={setSelectedStock}
+                // removeFavorites={removeFavorites}
+              />
+              //   <View
+              //     key={idx}
+              //     style={{
+              //       position: "relative",
+              //       height: 60,
+              //       width: "100%",
+              //       backgroundColor: "pink",
+              //       borderTopColor: "blue",
+              //       borderTopWidth: 2,
+              //       marginTop: 20,
+              //       //   paddingTop: 25,
+              //     }}
+              //   >
+              //     <View
+              //       style={{
+              //         backgroundColor: "red",
+              //         position: "absolute",
+              //         top: 0,
+              //         height: 60,
+              //         paddingTop: 25,
+              //         display: "flex",
+              //         flexDirection: "row",
+              //         alignItems: "center",
+              //         justifyContent: "flex-end",
+              //         width: "100%",
+              //       }}
+              //     >
+              //       {/* <Text>Hi this the delete button</Text> */}
+              //       <Icon.Button
+              //         name="trash"
+              //         backgroundColor={null}
+              //         color="white"
+              //         //   size={10}
+              //         onPress={() => setModalVisible(true)}
+              //       />
+              //     </View>
+              //     <GestureHandlerRootView>
+              //       <PanGestureHandler
+              //         {...gestureHandler}
+              //         onGestureEvent={panGestureEvent}
+              //       >
+              //         <Animated.View
+              //           style={{
+              //             position: "absolute",
+              //             top: 0,
+              //             height: 60,
+              //             backgroundColor: "white",
+              //             // paddingTop: 10,
+              //             display: "flex",
+              //             width: "100%",
+              //             transform: [
+              //               {
+              //                 translateX: t1X,
+              //               },
+              //             ],
+              //           }}
+              //         >
+              //           <TouchableOpacity
+              //             onPress={() => {
+              //               console.log("touchable opacity clicked=");
+              //             }}
+              //             style={{ backgroundColor: "pink", height: 60 }}
+              //           >
+              //             <Text style={{ color: "black", fontSize: 18 }}>
+              //               {stock.symbol}
+              //             </Text>
+
+              //             <Text style={{ color: "black", fontSize: 18 }}>
+              //               {stock.name}
+              //             </Text>
+              //           </TouchableOpacity>
+              //         </Animated.View>
+              //       </PanGestureHandler>
+              //     </GestureHandlerRootView>
+              //   </View>
+
+              //   <GestureHandlerRootView key={idx}>
+              //     <View
+              //       style={{
+              //         display: "flex",
+              //         borderTopColor: "white",
+              //         borderTopWidth: 2,
+              //         marginTop: 20,
+              //         paddingTop: 15,
+              //       }}
+              //     >
+              //       <Swipeable
+              //         renderRightActions={rightSwipe}
+              //         onSwipeableRightOpen={() => {
+              //           console.log("onSwipeableRightOpen stock= ", stock);
+              //           setModalVisible(true);
+              //           setSelectedStock(stock);
+              //         }}
+              //       >
+              //         <TouchableOpacity onPress={() => handleFavClick(stock)}>
+              //           <View
+              //           // key={idx}
+              //           >
+              //             <Text style={{ color: "white", fontSize: 18 }}>
+              //               {stock.symbol}
+              //             </Text>
+              //             <Text style={{ color: "white", fontSize: 18 }}>
+              //               {stock.name}
+              //             </Text>
+              //           </View>
+              //         </TouchableOpacity>
+              //       </Swipeable>
+              //     </View>
+              //   </GestureHandlerRootView>
             ))}
           </View>
         )}
@@ -258,7 +471,7 @@ const styles = StyleSheet.create({
     flex: 1,
     display: "flex",
     paddingTop: 20,
-    paddingHorizontal: 10,
+    paddingHorizontal: 20,
   },
 });
 
