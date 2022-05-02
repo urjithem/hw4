@@ -65,6 +65,7 @@ const SearchScreen = ({ navigation }) => {
               width: 200,
             }}
             onChangeText={(text) => {
+              setLoading(true);
               setKeyword(text);
               if (text.length > 0) delayedQuery(text);
             }}

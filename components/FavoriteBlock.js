@@ -48,7 +48,6 @@ const width = Dimensions.get("window").width;
 
 const FavoriteBlock = ({
   stock,
-  key,
   setModalVisible,
   navigation,
   handleFavClick,
@@ -74,16 +73,19 @@ const FavoriteBlock = ({
   };
   useCode(
     () => [
+      call([], () => {
+        setSelectedStock(stock);
+      }),
       cond(eq(state, State.ACTIVE), set(t1X, add(ofX, translation.x))),
       cond(eq(state, State.END), [
-        // // cond(
-        // //   lessThan(translation.x, width),
-        // set(t1X, width),
-        // //   call([], () => {
-        // //     // console.log("lesser than ", t1X);
-        // //     printToConsole(`lesser than ${translation.x}`);
-        // //   })
-        // // ),
+        // cond(
+        //   lessThan(translation.x, width),
+        //   set(t1X, width),
+        //   call([], () => {
+        //     // console.log("lesser than ", t1X);
+        //     printToConsole(`lesser than ${translation.x}`);
+        //   })
+        // ),
         cond(
           lessThan(translation.x, -200),
           //   set(translation.x, width),
@@ -96,11 +98,17 @@ const FavoriteBlock = ({
           }),
           set(t1X, width)
         ),
-        cond(
-          eq(showDelete, 1),
-          set(t1X, width),
-          call([], () => printToConsole("showdelete called"))
-        ),
+        set(t1X, 0),
+        // cond(
+        //   eq(showDelete, 1),
+        //   set(t1X, width),
+        //   call([], () => {
+        //     printToConsole("showdelete called");
+        //     printToConsole(`delete item ${translation.x}`);
+        //     setSelectedStock(stock);
+        //     setModalVisible(true);
+        //   })
+        // ),
       ]),
 
       //
@@ -171,6 +179,7 @@ const FavoriteBlock = ({
             // onGestureEvent={panGestureEvent}
           >
             <Animated.View
+              onTouchStart={() => setSelectedStock(stock)}
               style={[
                 {
                   transform: [{ translateX: t1X }],
@@ -188,6 +197,7 @@ const FavoriteBlock = ({
                   height: "100%",
                 }}
                 onPress={() => {
+                  setSelectedStock(stock);
                   handleFavClick(stock);
                   //   console.log("touchable without feedback");
                   //   navigation.navigate("Stock");
